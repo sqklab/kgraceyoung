@@ -1,0 +1,42 @@
+# OS / editor
+.DS_Store
+.vscode/
+.idea/
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.venv/
+venv/
+.env
+.env.*
+!.env.example
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+outputs/
+# Node
+node_modules/
+dist/
+.npm/
+
+# Runtime DB / logs / artifacts
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
+data/
+logs/
+*.log
+
+# Notebooks / backups
+*.ipynb
+*.bak
+
+# Secrets / certs generated locally
+*.pem
+!backend/certs/global-bundle.pem
