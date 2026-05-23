@@ -1,0 +1,134 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: graceyoung-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-graceyoung}
+      POSTGRES_USER: ${POSTGRES_USER:-graceyoung}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change_me_graceyoung_db}
+    volumes:
+      - gy_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-graceyoung} -d ${POSTGRES_DB:-graceyoung}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    container_name: graceyoung-redis
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - gy_redis_data:/data
+
+  minio:
+    image: minio/minio:RELEASE.2024-05-10T01-41-38Z
+    container_name: graceyoung-minio
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-change_me_minio_password}
+    volumes:
+      - gy_minio_data:/data
+    ports:
+      - "19000:9000"
+      - "19001:9001"
+
+  minio-init:
+    image: minio/mc:RELEASE.2024-05-09T17-04-24Z
+    container_name: graceyoung-minio-init
+    depends_on:
+      - minio
+    entrypoint: >
+      /bin/sh -c "
+      sleep 5;
+      mc alias set local http://minio:9000 ${MINIO_ROOT_USER:-minioadmin} ${MINIO_ROOT_PASSWORD:-change_me_minio_password};
+      mc mb -p local/${MINIO_BUCKET_PRODUCTS:-grace-young-products} || true;
+      mc mb -p local/${MINIO_BUCKET_REELS:-grace-young-reels} || true;
+      mc mb -p local/${MINIO_BUCKET_REVIEWS:-grace-young-reviews} || true;
+      mc anonymous set download local/${MINIO_BUCKET_PRODUCTS:-grace-young-products} || true;
+      exit 0;
+      "
+
+  meilisearch:
+    image: getmeili/meilisearch:v1.8
+    container_name: graceyoung-meilisearch
+    restart: unless-stopped
+    environment:
+      MEILI_MASTER_KEY: ${MEILI_MASTER_KEY:-change_me_meili_master_key}
+      MEILI_ENV: production
+    volumes:
+      - gy_meili_data:/meili_data
+    ports:
+      - "17700:7700"
+
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: graceyoung-backend
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      minio:
+        condition: service_started
+      meilisearch:
+        condition: service_started
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-graceyoung}:${POSTGRES_PASSWORD:-change_me_graceyoung_db}@postgres:5432/${POSTGRES_DB:-graceyoung}
+      REDIS_URL: redis://redis:6379/0
+      QUEUE_BROKER_URL: redis://redis:6379/1
+      QUEUE_RESULT_BACKEND: redis://redis:6379/2
+      MINIO_ENDPOINT: minio:9000
+      MINIO_SECURE: "false"
+      MEILI_URL: http://meilisearch:7700
+    ports:
+      - "18000:8000"
+
+  client:
+    build:
+      context: .
+      dockerfile: frontend/client/Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:18000}
+        NEXT_PUBLIC_CLIENT_ORIGIN: ${CLIENT_ORIGIN:-http://localhost:13000}
+        NEXT_PUBLIC_ADMIN_ORIGIN: ${ADMIN_ORIGIN:-http://localhost:13001}
+    container_name: graceyoung-client
+    restart: unless-stopped
+    depends_on:
+      - backend
+    env_file:
+      - .env
+    ports:
+      - "13000:3000"
+
+  admin:
+    build:
+      context: .
+      dockerfile: frontend/admin/Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:18000}
+        NEXT_PUBLIC_CLIENT_ORIGIN: ${CLIENT_ORIGIN:-http://localhost:13000}
+        NEXT_PUBLIC_ADMIN_ORIGIN: ${ADMIN_ORIGIN:-http://localhost:13001}
+    container_name: graceyoung-admin
+    restart: unless-stopped
+    depends_on:
+      - backend
+    env_file:
+      - .env
+    ports:
+      - "13001:3001"
+
+volumes:
+  gy_postgres_data:
+  gy_redis_data:
+  gy_minio_data:
+  gy_meili_data:
