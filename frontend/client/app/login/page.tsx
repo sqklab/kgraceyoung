@@ -4,6 +4,26 @@ import { FormEvent, useState } from 'react';
 
 const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
+function normalizeDetail(detail: unknown) {
+  if (!detail) return '';
+  if (typeof detail === 'string') return detail;
+  if (Array.isArray(detail)) {
+    return detail
+      .map((item) => {
+        if (typeof item === 'string') return item;
+        if (item && typeof item === 'object') {
+          const anyItem = item as { msg?: string; loc?: unknown[]; type?: string };
+          const loc = Array.isArray(anyItem.loc) ? anyItem.loc.join('.') : '';
+          return [loc, anyItem.msg || anyItem.type].filter(Boolean).join(': ');
+        }
+        return String(item);
+      })
+      .join(' / ');
+  }
+  if (typeof detail === 'object') return JSON.stringify(detail);
+  return String(detail);
+}
+
 function friendlyError(error: unknown) {
   const msg = error instanceof Error ? error.message : String(error);
   if (msg.includes('Failed to fetch') || msg.includes('NetworkError')) {
@@ -29,7 +49,7 @@ export default function CustomerLoginPage() {
         body: JSON.stringify({ email, password }),
       });
       const json = await res.json().catch(() => ({}));
-      if (!res.ok) { setMessage(json.detail || 'Login failed. Check seed account and password.'); return; }
+      if (!res.ok) { setMessage(normalizeDetail(json.detail) || 'Login failed. Check seed account and password.'); return; }
       localStorage.setItem('gy_customer_token', json.access_token);
       localStorage.setItem('gy_customer_user', JSON.stringify(json.user));
       window.location.href = '/account';

@@ -161,3 +161,6 @@ docker compose -f docker-compose.prod.yml --env-file .env ps
 docker compose -f docker-compose.prod.yml --env-file .env exec backend alembic upgrade head
 docker compose -f docker-compose.prod.yml --env-file .env exec backend python scripts/seed_phase2_catalog.py --reset
 
+docker compose -f docker-compose.prod.yml --env-file .env build --no-cache backend
+docker compose -f docker-compose.prod.yml --env-file .env up -d backend
+

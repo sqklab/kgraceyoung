@@ -6,6 +6,7 @@ from app.api.v1.catalog import router as catalog_router
 from app.api.v1.reels import router as reels_router
 from app.api.v1.auth import router as auth_router
 from app.api.v1.commerce import router as commerce_router
+from app.api.v1.assets import router as assets_router
 from app.api.v1.admin.catalog_admin import router as catalog_admin_router
 from app.api.v1.admin.orders_admin import router as orders_admin_router
 
@@ -23,6 +24,7 @@ app.add_middleware(
 app.include_router(health_router)
 app.include_router(auth_router, prefix="/api/v1")
 app.include_router(commerce_router, prefix="/api/v1")
+app.include_router(assets_router, prefix="/api/v1")
 app.include_router(catalog_router, prefix="/api/v1")
 app.include_router(reels_router, prefix="/api/v1")
 app.include_router(catalog_admin_router, prefix="/api/v1")

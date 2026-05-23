@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -52,10 +52,32 @@ def register(payload: RegisterRequest, db: Session = Depends(get_db)):
 
 
 @router.post("/login", response_model=TokenResponse)
-def login(payload: LoginRequest, db: Session = Depends(get_db)):
-    email = payload.email.lower()
+async def login(request: Request, db: Session = Depends(get_db)):
+    """Accept both JSON login payloads and OAuth-style form payloads.
+
+    This keeps the API stable for the Next.js client and Swagger/OAuth tools,
+    and prevents deployment mismatches from returning an opaque 422 page error.
+    """
+    content_type = request.headers.get("content-type", "").lower()
+    if "application/x-www-form-urlencoded" in content_type or "multipart/form-data" in content_type:
+        form = await request.form()
+        raw_email = form.get("email") or form.get("username")
+        raw_password = form.get("password")
+    else:
+        try:
+            body = await request.json()
+        except Exception:
+            body = {}
+        raw_email = body.get("email") or body.get("username")
+        raw_password = body.get("password")
+
+    if not raw_email or not raw_password:
+        raise HTTPException(status_code=400, detail="Email and password are required")
+
+    email = str(raw_email).lower().strip()
+    password = str(raw_password)
     user = db.scalar(select(User).where(User.email == email))
-    if not user or not user.hashed_password or not verify_password(payload.password, user.hashed_password):
+    if not user or not user.hashed_password or not verify_password(password, user.hashed_password):
         raise HTTPException(status_code=401, detail="Invalid email or password")
     if not user.is_active:
         raise HTTPException(status_code=403, detail="User is inactive")

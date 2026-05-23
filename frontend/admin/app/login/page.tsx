@@ -4,6 +4,14 @@ import { FormEvent, useState } from 'react';
 
 const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
+function normalizeDetail(detail: unknown) {
+  if (!detail) return '';
+  if (typeof detail === 'string') return detail;
+  if (Array.isArray(detail)) return detail.map((x) => typeof x === 'string' ? x : JSON.stringify(x)).join(' / ');
+  if (typeof detail === 'object') return JSON.stringify(detail);
+  return String(detail);
+}
+
 function friendlyError(error: unknown) {
   const msg = error instanceof Error ? error.message : String(error);
   if (msg.includes('Failed to fetch') || msg.includes('NetworkError')) {
@@ -30,7 +38,7 @@ export default function AdminLoginPage() {
       });
       const json = await res.json().catch(() => ({}));
       if (!res.ok) {
-        setMessage(json.detail || 'Login failed');
+        setMessage(normalizeDetail(json.detail) || 'Login failed');
         return;
       }
       if (!['admin', 'super_admin'].includes(json.user.role)) {
