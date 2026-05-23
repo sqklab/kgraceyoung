@@ -127,6 +127,35 @@ For your current NPM setup, keep **HTTP/2 Support OFF** until the Nginx image is
 | GET | `/api/v1/commerce/orders` | Customer order history |
 | GET | `/api/v1/admin/orders` | Admin order review |
 
-## Next Recommended Phase
+| 도메인                                      | Forward                   |
+| ---------------------------------------- | ------------------------- |
+| `kgraceyoung.com`, `www.kgraceyoung.com` | `http://172.17.0.1:13000` |
+| `admin.kgraceyoung.com`                  | `http://172.17.0.1:13001` |
+| `api.kgraceyoung.com`                    | `http://172.17.0.1:18000` |
 
-Phase 6 should add Stripe/PayPal checkout session creation, payment webhooks, inventory deduction, shipping-rate quote, and order status transitions.
+| 유형  | Email                       | Password       |
+| --- | --------------------------- | -------------- |
+| 관리자 | `admin@graceyoung.local`    | `Admin123!`    |
+| 고객  | `customer@graceyoung.local` | `Customer123!` |
+
+| 서비스           | Host Port |
+| ------------- | --------: |
+| Client        |   `13000` |
+| Admin         |   `13001` |
+| Backend API   |   `18000` |
+| PostgreSQL    |   `15432` |
+| Redis         |   `16379` |
+| MinIO API     |   `19000` |
+| MinIO Console |   `19001` |
+| Meilisearch   |   `17700` |
+| MailHog UI    |   `18025` |
+| Adminer       |   `18080` |
+
+
+
+docker network create graceyoung-net || true
+
+docker compose -f docker-compose.infra.yml --env-file .env up -d
+
+docker compose -f docker-compose.prod.yml --env-file .env up -d --build
+
