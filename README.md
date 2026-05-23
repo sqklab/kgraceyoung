@@ -133,10 +133,7 @@ For your current NPM setup, keep **HTTP/2 Support OFF** until the Nginx image is
 | `admin.kgraceyoung.com`                  | `http://172.17.0.1:13001` |
 | `api.kgraceyoung.com`                    | `http://172.17.0.1:18000` |
 
-| 유형  | Email                       | Password       |
-| --- | --------------------------- | -------------- |
-| 관리자 | `admin@graceyoung.local`    | `Admin123!`    |
-| 고객  | `customer@graceyoung.local` | `Customer123!` |
+
 
 | 서비스           | Host Port |
 | ------------- | --------: |
