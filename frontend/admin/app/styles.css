@@ -50,3 +50,20 @@ h2 { font-size:38px; margin:0 0 12px; letter-spacing:-1px; }
 .orderRow span, .orderRow small { color:#765f58; }
 .orderRow b { color:var(--coral); font-size:20px; }
 @media (max-width: 720px) { .orderRow{grid-template-columns:1fr;} }
+
+/* Phase 5.1 premium admin polish */
+a, button, input, select, textarea { transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease, background .18s ease, color .18s ease; }
+button:hover, .form button:hover, .loginCard button:hover { transform:translateY(-2px); box-shadow:0 16px 32px rgba(255,122,107,.28); }
+button:disabled { opacity:.62; cursor:not-allowed; transform:none; box-shadow:none; }
+aside h1, .loginCard h1 { font-family: Georgia, 'Times New Roman', serif; font-weight:800; }
+.cardLink:hover, article:hover { transform:translateY(-4px); box-shadow:0 24px 54px rgba(43,30,26,.13); }
+.cardLink, article { transition:transform .2s ease, box-shadow .2s ease; }
+.form input:focus, .form select:focus, .form textarea:focus, .loginCard input:focus { outline:none; border-color:var(--coral); box-shadow:0 0 0 4px rgba(255,122,107,.14); }
+.premiumLoginPage { background:
+  radial-gradient(circle at 20% 18%, rgba(255,122,107,.22), transparent 30%),
+  radial-gradient(circle at 88% 82%, rgba(216,162,74,.16), transparent 34%),
+  linear-gradient(135deg,#fff9f4,#fde1d9 58%,#fff7f0); }
+.premiumLoginCard { border:1px solid rgba(255,255,255,.78); box-shadow:0 42px 120px rgba(43,30,26,.18); backdrop-filter:blur(18px); }
+.premiumLoginCard h1 { color:#221512; }
+.premiumLoginCard input { outline:none; }
+.notice { font-size:14px; line-height:1.45; border-width:1px; background:#fff7f4; color:#6c3029; }
