@@ -157,5 +157,10 @@ docker network create graceyoung-net || true
 
 docker compose -f docker-compose.infra.yml --env-file .env up -d
 
-docker compose -f docker-compose.prod.yml --env-file .env up -d --build
+
+docker compose -f docker-compose.prod.yml --env-file .env build
+docker compose -f docker-compose.prod.yml --env-file .env up -d
+docker compose -f docker-compose.prod.yml --env-file .env ps
+docker compose -f docker-compose.prod.yml --env-file .env exec backend alembic upgrade head
+docker compose -f docker-compose.prod.yml --env-file .env exec backend python scripts/seed_phase2_catalog.py --reset
 
