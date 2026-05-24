@@ -1,23 +1,32 @@
 import AuthHeader from './AuthHeader';
 
-const categories = ['Beauty', 'Best', 'New', 'Brands', 'Skincare', 'Makeup', 'Body', 'Hair', 'Face Masks', 'Suncare', 'K-Pop'];
+const categories = ['SHOP ALL', 'SKINCARE', 'SUNCARE', 'DEVICES', 'REELS', 'BRANDS'];
+
+function SearchIcon() {
+  return (
+    <svg width="28" height="28" viewBox="0 0 24 24" aria-hidden="true">
+      <circle cx="10.7" cy="10.7" r="6.7" fill="none" stroke="currentColor" strokeWidth="2" />
+      <path d="m15.7 15.7 5 5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    </svg>
+  );
+}
 
 export default function CommerceHeader() {
   return (
-    <header className="kurlyHeaderWrap">
-      <section className="utilityBar">Free shipping over US$49 · English / Français / Español / 한국어</section>
-      <div className="mainHeaderKurly">
-        <a className="brandLogoKurly" href="/">GRACE YOUNG</a>
-        <form className="searchBoxKurly" action="/">
-          <input name="q" placeholder="Search for a product or brand..." />
-          <button type="submit" aria-label="Search">⌕</button>
-        </form>
-        <AuthHeader />
+    <header className="selfHeaderWrap">
+      <div className="selfTopHeader">
+        <a className="selfLogo" href="/" aria-label="Grace Young home">GRACE YOUNG</a>
+        <div className="selfRightStack">
+          <form className="selfSearchBox" action="/">
+            <input name="q" placeholder="Search" />
+            <button type="submit" aria-label="Search"><SearchIcon /></button>
+          </form>
+          <div className="selfShippingText">FREE SHIPPING ON ORDERS OVER $70+</div>
+          <AuthHeader />
+        </div>
       </div>
-      <nav className="categoryNavKurly">
-        <button className="hamburgerKurly" aria-label="Open categories">☰</button>
-        {categories.map((c) => <a href="/#best" key={c}>{c}</a>)}
-        <a className="membershipLink" href="/account">Membership</a>
+      <nav className="selfMenuBar" aria-label="Main categories">
+        {categories.map((c, idx) => <a className={idx === 0 ? 'active' : ''} href="/#best" key={c}>{c}</a>)}
       </nav>
     </header>
   );
