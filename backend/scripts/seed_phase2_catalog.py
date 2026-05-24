@@ -24,11 +24,12 @@ import random
 import re
 import sys
 import tempfile
+from io import BytesIO
 from decimal import Decimal
 from pathlib import Path
 from typing import Iterable
 
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageDraw, ImageFont, ImageOps
 from sqlalchemy import delete, select
 
 # Allow running from backend/scripts without installing the package.
@@ -48,6 +49,11 @@ try:
     import meilisearch
 except Exception:  # pragma: no cover
     meilisearch = None
+
+try:
+    import httpx
+except Exception:  # pragma: no cover
+    httpx = None
 
 settings = get_settings()
 random.seed(42)
@@ -105,6 +111,149 @@ PALETTES = [
     ("#F8EEEE", "#C98F7A", "#2B1E1A"),
     ("#F5F7F2", "#A6B7A1", "#2B1E1A"),
 ]
+
+
+PUBLIC_SEARCHES = [
+    ("skincare", ["serum", "face cream", "toner", "cleanser", "moisturizer"]),
+    ("suncare", ["sunscreen", "sun stick", "spf", "after sun", "sun cream"]),
+    ("face-masks", ["sheet mask", "face mask", "hydrogel mask", "patch", "toner pad"]),
+    ("makeup", ["lipstick", "mascara", "foundation", "blush", "eyeliner"]),
+    ("k-beauty-devices", ["beauty device", "facial device", "skin device", "led mask", "massager"]),
+]
+
+
+def safe_text(value, fallback: str = "") -> str:
+    if isinstance(value, list):
+        value = ", ".join(str(v) for v in value if v)
+    value = str(value or fallback).strip()
+    return value[:240]
+
+
+def public_image_to_square(url: str, out_path: Path) -> bool:
+    if not httpx or not url:
+        return False
+    try:
+        with httpx.Client(timeout=12, follow_redirects=True, headers={"User-Agent": "GraceYoungSeed/0.1"}) as client:
+            response = client.get(url)
+            response.raise_for_status()
+        img = Image.open(BytesIO(response.content)).convert("RGB")
+        img = ImageOps.contain(img, (820, 820), method=Image.Resampling.LANCZOS)
+        canvas = Image.new("RGB", (900, 900), "#f8f3ef")
+        canvas.paste(img, ((900 - img.width) // 2, (900 - img.height) // 2))
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        canvas.save(out_path, "JPEG", quality=88, optimize=True)
+        return True
+    except Exception:
+        return False
+
+
+def fetch_openbeautyfacts_records(limit: int = 250) -> list[dict]:
+    """Fetch open cosmetic product records with image URLs from Open Beauty Facts.
+
+    Open Beauty Facts is an open, collaborative cosmetic database. The seed keeps a
+    fallback generated image path, so local/offline deployments still work.
+    """
+    if not httpx:
+        return []
+    records: list[dict] = []
+    seen: set[str] = set()
+    fields = "product_name,brands,image_front_url,image_url,categories_tags,categories,code"
+    with httpx.Client(timeout=14, follow_redirects=True, headers={"User-Agent": "GraceYoungSeed/0.1"}) as client:
+        for category_slug, terms in PUBLIC_SEARCHES:
+            for term in terms:
+                if len(records) >= limit:
+                    return records[:limit]
+                try:
+                    res = client.get(
+                        "https://world.openbeautyfacts.org/cgi/search.pl",
+                        params={
+                            "search_terms": term,
+                            "search_simple": 1,
+                            "action": "process",
+                            "json": 1,
+                            "page_size": 40,
+                            "fields": fields,
+                        },
+                    )
+                    res.raise_for_status()
+                    data = res.json()
+                except Exception:
+                    continue
+                for item in data.get("products", []):
+                    name = safe_text(item.get("product_name"))
+                    brand = safe_text(item.get("brands"), "Open Beauty Brand").split(",")[0].strip() or "Open Beauty Brand"
+                    image_url = item.get("image_front_url") or item.get("image_url")
+                    code = str(item.get("code") or f"{brand}-{name}")
+                    if not name or not image_url or code in seen:
+                        continue
+                    seen.add(code)
+                    records.append({
+                        "category_slug": category_slug,
+                        "brand": brand[:80],
+                        "name": name[:140],
+                        "image_url": image_url,
+                        "description": safe_text(item.get("categories"), "Open cosmetic product data with public product imagery."),
+                    })
+                    if len(records) >= limit:
+                        return records[:limit]
+    return records[:limit]
+
+
+def seed_public_catalog(db, categories: dict[str, Category], tmp_dir: Path, limit: int = 250) -> list[Product]:
+    records = fetch_openbeautyfacts_records(limit=limit)
+    if not records:
+        return []
+    created: list[Product] = []
+    brand_cache: dict[str, Brand] = {}
+    for idx, rec in enumerate(records, start=1):
+        category = categories.get(rec["category_slug"]) or next(iter(categories.values()))
+        brand_name = rec["brand"] or "Open Beauty Brand"
+        brand_slug = slugify(brand_name) or f"open-beauty-brand-{idx}"
+        brand = brand_cache.get(brand_slug)
+        if not brand:
+            brand = db.scalar(select(Brand).where(Brand.slug == brand_slug))
+        if not brand:
+            brand = Brand(
+                slug=brand_slug,
+                name=brand_name,
+                country="Public Data",
+                description="Public cosmetic product record imported for Grace Young demo catalog.",
+                is_active=True,
+            )
+            db.add(brand)
+            db.flush()
+        brand_cache[brand_slug] = brand
+
+        product_slug = slugify(f"{brand_name}-{rec['name']}") or f"public-product-{idx:03d}"
+        if db.scalar(select(Product).where(Product.slug == product_slug)):
+            product_slug = f"{product_slug}-{idx:03d}"
+        local_img = tmp_dir / f"public-{product_slug}.jpg"
+        if not public_image_to_square(rec.get("image_url", ""), local_img):
+            make_product_image(rec["name"], brand_name, category.name, local_img)
+            content_type = "image/png"
+            object_key = f"public-products/{category.slug}/{product_slug}.png"
+        else:
+            content_type = "image/jpeg"
+            object_key = f"public-products/{category.slug}/{product_slug}.jpg"
+        image_url = upload_file(local_img, object_key, content_type, settings.minio_bucket_products)
+        price = Decimal(str(round(random.uniform(8, 75), 2)))
+        if category.slug == "k-beauty-devices":
+            price = Decimal(str(round(random.uniform(59, 199), 2)))
+        product = Product(
+            brand_id=brand.id,
+            slug=product_slug,
+            name=rec["name"],
+            short_description=rec.get("description") or "Public cosmetic product data curated for Grace Young demo commerce.",
+            price=price,
+            currency="USD",
+            status="published",
+        )
+        product.brand = brand
+        product.categories = [category]
+        product.images = [ProductImage(url=image_url, alt_text=f"{brand_name} {rec['name']}", sort_order=0)]
+        db.add(product)
+        created.append(product)
+    return created
 
 def slugify(value: str) -> str:
     value = value.lower().strip()
@@ -240,7 +389,7 @@ def index_products(products: Iterable[Product]):
     except Exception as exc:
         print(f"[WARN] Meilisearch indexing skipped: {exc}")
 
-def seed(reset: bool = False):
+def seed(reset: bool = False, public_data: bool = False):
     ensure_bucket(settings.minio_bucket_products)
     created_products: list[Product] = []
     with SessionLocal() as db:
@@ -261,6 +410,26 @@ def seed(reset: bool = False):
 
         tmp_dir = Path(tempfile.gettempdir()) / "grace_young_phase2_images"
         tmp_dir.mkdir(parents=True, exist_ok=True)
+
+        if public_data:
+            public_products = seed_public_catalog(db, categories, tmp_dir)
+            if public_products:
+                db.commit()
+                products = db.scalars(select(Product)).all()
+                index_products(products)
+                summary = {
+                    "categories": db.query(Category).count(),
+                    "brands": db.query(Brand).count(),
+                    "products": db.query(Product).count(),
+                    "images": db.query(ProductImage).count(),
+                    "bucket": settings.minio_bucket_products,
+                    "source": "Open Beauty Facts public data",
+                }
+                print("Public cosmetics seed completed:")
+                for k, v in summary.items():
+                    print(f"  - {k}: {v}")
+                return
+            print("[WARN] Public cosmetic data fetch failed; falling back to generated sample data.")
 
         for cat in CATEGORIES:
             category = categories[cat["slug"]]
@@ -331,5 +500,6 @@ def seed(reset: bool = False):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--reset", action="store_true", help="Delete existing catalog rows before seeding")
+    parser.add_argument("--public-data", action="store_true", help="Fetch public cosmetic product data and images from Open Beauty Facts when internet is available")
     args = parser.parse_args()
-    seed(reset=args.reset)
+    seed(reset=args.reset, public_data=args.public_data)
