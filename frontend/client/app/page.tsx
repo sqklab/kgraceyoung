@@ -6,14 +6,14 @@ const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 type Product = { id: string; slug: string; name: string; brand: string; price: number; currency: string; image_url?: string; description?: string };
 
 const heroSlides = [
-  { image: '/hero/grace-hero-01.svg', title: 'Rose Glass Tint', subtitle: 'soft color layer', cta: 'SHOP NOW' },
-  { image: '/hero/grace-hero-02.svg', title: 'Cica Calm Routine', subtitle: 'barrier-friendly skincare', cta: 'SHOP SKINCARE' },
-  { image: '/hero/grace-hero-03.svg', title: 'Daily Sun Glow', subtitle: 'weightless SPF comfort', cta: 'SHOP SUN CARE' },
-  { image: '/hero/grace-hero-04.svg', title: 'Violet Repair Serum', subtitle: 'plump and smooth', cta: 'DISCOVER' },
-  { image: '/hero/grace-hero-05.svg', title: 'Hydra Dew Cream', subtitle: 'deep moisture finish', cta: 'SHOP CREAM' },
-  { image: '/hero/grace-hero-06.svg', title: 'Lip Care Ritual', subtitle: 'glossy soft lips', cta: 'SHOP LIP CARE' },
-  { image: '/hero/grace-hero-07.svg', title: 'Rice Bright Cleanse', subtitle: 'fresh clean glow', cta: 'SHOP CLEANSERS' },
-  { image: '/hero/grace-hero-08.svg', title: 'Vegan Beauty Edit', subtitle: 'clean daily essentials', cta: 'SHOP VEGAN' },
+  { image: '/hero/grace-slide-01.png', title: 'Total Skin Rejuvenation' },
+  { image: '/hero/grace-slide-02.png', title: 'Botanical Daily Ritual' },
+  { image: '/hero/grace-slide-03.png', title: 'Clean Clinical Essentials' },
+  { image: '/hero/grace-slide-04.png', title: 'Private Label Beauty' },
+  { image: '/hero/grace-slide-05.png', title: 'Sunlit Body Care' },
+  { image: '/hero/grace-slide-06.png', title: 'Warm Botanical Skincare' },
+  { image: '/hero/grace-slide-07.png', title: 'Brightening Treatment Set' },
+  { image: '/hero/grace-slide-08.png', title: 'Fresh Leaf Moisture' },
 ];
 
 async function getProducts(): Promise<Product[]> {
@@ -40,13 +40,7 @@ export default async function Home() {
         <div className="sbHeroTrack">
           {heroSlides.map((slide, index) => (
             <article className="sbHeroSlide" key={slide.title} aria-hidden={index !== 0}>
-              <img src={slide.image} alt="" />
-              <div className="sbHeroCopy">
-                <h1>{slide.title}</h1>
-                <div />
-                <p>{slide.subtitle}</p>
-                <a href="#products">{slide.cta}</a>
-              </div>
+              <img src={slide.image} alt={slide.title} />
             </article>
           ))}
         </div>
@@ -65,9 +59,9 @@ export default async function Home() {
             <article className="emptyCatalog">No products yet. Run <b>seed_phase2_catalog.py</b>.</article>
           ) : products.map((p) => (
             <article className="sbProductCard" key={p.id}>
-              <a className="sbProductImage" href={`/products/${p.slug || p.id}`}>
+              <div className="sbProductImage">
                 {p.image_url ? <img src={p.image_url} alt={p.name} /> : <span>No image</span>}
-              </a>
+              </div>
               <small>{p.brand}</small>
               <h3>{p.name}</h3>
               <div className="sbPrice">{formatMoney(p.price)}</div>
