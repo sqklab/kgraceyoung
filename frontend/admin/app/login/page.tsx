@@ -21,7 +21,7 @@ function friendlyError(error: unknown) {
 }
 
 export default function AdminLoginPage() {
-  const [email, setEmail] = useState('admin@graceyoung.local');
+  const [email, setEmail] = useState('admin@kgraceyoung.com');
   const [password, setPassword] = useState('Admin123!');
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
@@ -65,7 +65,7 @@ export default function AdminLoginPage() {
         <label>Email<input autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} /></label>
         <label>Password<input autoComplete="current-password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} /></label>
         <button disabled={loading}>{loading ? 'Signing in…' : 'Sign in to Admin'}</button>
-        <small>Seeded account: admin@graceyoung.local / Admin123!</small>
+        <small>Seeded account: admin@kgraceyoung.com / Admin123!</small>
       </form>
     </main>
   );

@@ -6,7 +6,7 @@ const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
 export default function RegisterPage() {
   const [fullName, setFullName] = useState('Grace Young Customer');
-  const [email, setEmail] = useState('new.customer@graceyoung.local');
+  const [email, setEmail] = useState('new.customer@kgraceyoung.com');
   const [password, setPassword] = useState('Customer123!');
   const [locale, setLocale] = useState('en');
   const [message, setMessage] = useState('');

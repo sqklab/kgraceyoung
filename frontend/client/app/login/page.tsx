@@ -33,7 +33,7 @@ function friendlyError(error: unknown) {
 }
 
 export default function CustomerLoginPage() {
-  const [email, setEmail] = useState('customer@graceyoung.local');
+  const [email, setEmail] = useState('customer@kgraceyoung.com');
   const [password, setPassword] = useState('Customer123!');
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);

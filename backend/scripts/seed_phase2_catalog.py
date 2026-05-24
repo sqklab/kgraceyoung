@@ -176,8 +176,8 @@ def make_product_image(product_name: str, brand_name: str, category_name: str, o
 
 def create_demo_users(db):
     demo_users = [
-        {"email": "admin@graceyoung.local", "password": "Admin123!", "full_name": "Grace Young Admin", "role": "admin", "locale": "en"},
-        {"email": "customer@graceyoung.local", "password": "Customer123!", "full_name": "Grace Young Customer", "role": "customer", "locale": "en"},
+        {"email": "admin@kgraceyoung.com", "password": "Admin123!", "full_name": "Grace Young Admin", "role": "admin", "locale": "en"},
+        {"email": "customer@kgraceyoung.com", "password": "Customer123!", "full_name": "Grace Young Customer", "role": "customer", "locale": "en"},
     ]
     for item in demo_users:
         user = db.scalar(select(User).where(User.email == item["email"]))
