@@ -15,6 +15,9 @@ function BagIcon() {
 function HeartIcon() {
   return (<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.2S4.7 16 3.2 10.6C2.1 6.8 6.4 4.3 9.2 6.7L12 9.1l2.8-2.4c2.8-2.4 7.1.1 6 3.9C19.3 16 12 20.2 12 20.2Z" fill="currentColor"/></svg>);
 }
+function GlobeIcon() {
+  return (<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" strokeWidth="1.8"/><path d="M3 12h18M12 3c2.3 2.4 3.3 5.4 3.3 9S14.3 18.6 12 21M12 3C9.7 5.4 8.7 8.4 8.7 12s1 6.6 3.3 9" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/></svg>);
+}
 
 export default function AuthHeader() {
   const [user, setUser] = useState<User | null>(null);
@@ -59,19 +62,20 @@ export default function AuthHeader() {
     setUser(null); setOpen(false); window.dispatchEvent(new Event('gy-auth-changed'));
   }
 
-  if (!ready && !user) return <div className="selfActions"><span className="selfSkeleton" /><span className="selfSkeleton" /></div>;
+  if (!ready && !user) return <div className="sbActions"><span className="sbSkeleton" /><span className="sbSkeleton" /></div>;
 
   return (
-    <div className="selfActions authMenuWrap">
-      <a className="selfAction selfCart" href="/cart"><BagIcon /><span>Shopping Cart</span><b>0</b></a>
-      <a className="selfAction" href="/wishlist"><HeartIcon /><span>My Wish Lists</span></a>
+    <div className="sbActions authMenuWrap">
+      <a className="sbAction sbCart" href="/cart"><BagIcon /><span>Shopping Cart</span><b>0</b></a>
+      <a className="sbAction" href="/wishlist"><HeartIcon /><span>My Wish Lists</span></a>
       {user ? (
-        <button className="selfAction selfAccount" onClick={() => setOpen((v) => !v)} aria-expanded={open} aria-label="My account"><UserIcon /><span>{displayName}</span></button>
+        <button className="sbAction sbAccount" onClick={() => setOpen((v) => !v)} aria-expanded={open} aria-label="My account"><UserIcon /><span>{displayName}</span></button>
       ) : (
-        <a className="selfAction selfAccount" href="/login"><span>Sign In or Create an account</span></a>
+        <a className="sbAction sbAccount" href="/login"><span>Sign In or Create an account</span></a>
       )}
+      <a className="sbAction sbGlobe" href="#"><GlobeIcon /></a>
       {open && user && (
-        <div className="accountDropdown selfAccountDropdown">
+        <div className="sbAccountDropdown accountDropdown">
           <a href="/account">My Grace</a><a href="/orders">Track Orders</a><a href="/wishlist">My Wish List</a><button onClick={logout}>Logout</button>
         </div>
       )}

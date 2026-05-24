@@ -2,8 +2,8 @@ import type { Metadata } from 'next';
 import './styles.css';
 
 export const metadata: Metadata = {
-  title: 'Grace Young | K-Beauty Video Commerce',
-  description: 'Watch K-Beauty reels, discover curated routines, and shop trusted Korean beauty.',
+  title: 'kgraceyoung | K-Beauty Commerce',
+  description: 'kgraceyoung beauty commerce for curated K-beauty routines and products.',
   icons: { icon: '/favicon.ico' }
 };
 
