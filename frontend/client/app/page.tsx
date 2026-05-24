@@ -13,9 +13,72 @@ const filterGroups = [
 ];
 
 const heroSlides = [
-  { image: '/hero/beauty-slide-1.svg', label: 'Seoul glow rituals', title: 'Clean glow routines, fresh from Seoul.', cta: 'Shop new beauty' },
-  { image: '/hero/beauty-slide-2.svg', label: 'Sensitive & barrier', title: 'Cica comfort for calm skin days.', cta: 'Explore cica care' },
-  { image: '/hero/beauty-slide-3.svg', label: 'Firming & devices', title: 'Premium device picks for home rituals.', cta: 'Shop devices' },
+  {
+    image: 'https://source.unsplash.com/1800x560/?korean,skincare,cosmetics&sig=101',
+    label: 'DAILY K-BEAUTY',
+    title: 'Everyday glow care, curated for sensitive skin.',
+    cta: 'Shop now'
+  },
+  {
+    image: 'https://source.unsplash.com/1800x560/?beauty,serum,skincare&sig=102',
+    label: 'CICA ROUTINE',
+    title: 'Calming care for barrier-first beauty rituals.',
+    cta: 'Explore cica'
+  },
+  {
+    image: 'https://source.unsplash.com/1800x560/?sunscreen,beauty,skincare&sig=103',
+    label: 'SUN CARE',
+    title: 'Lightweight SPF picks for every day.',
+    cta: 'Shop SPF'
+  },
+  {
+    image: 'https://source.unsplash.com/1800x560/?lipstick,cosmetics,pink&sig=104',
+    label: 'LIP CARE',
+    title: 'Soft lip color and glossy care in one routine.',
+    cta: 'Shop lip care'
+  },
+  {
+    image: 'https://source.unsplash.com/1800x560/?makeup,cosmetics,flatlay&sig=105',
+    label: 'MAKEUP',
+    title: 'Fresh color stories for clean daily looks.',
+    cta: 'Shop makeup'
+  },
+  {
+    image: 'https://source.unsplash.com/1800x560/?face,mask,skincare&sig=106',
+    label: 'MASK BAR',
+    title: 'Sheet masks and pads for quick glow days.',
+    cta: 'Shop masks'
+  },
+  {
+    image: 'https://source.unsplash.com/1800x560/?haircare,beauty,bottle&sig=107',
+    label: 'HAIR CARE',
+    title: 'Scalp and hair rituals for healthy shine.',
+    cta: 'Shop hair'
+  },
+  {
+    image: 'https://source.unsplash.com/1800x560/?bodycare,cosmetics,lotion&sig=108',
+    label: 'BODY CARE',
+    title: 'Body glow essentials for soft, smooth skin.',
+    cta: 'Shop body'
+  },
+  {
+    image: 'https://source.unsplash.com/1800x560/?beauty,device,led&sig=109',
+    label: 'DEVICES',
+    title: 'Home beauty devices for routine upgrades.',
+    cta: 'Shop devices'
+  },
+  {
+    image: 'https://source.unsplash.com/1800x560/?perfume,beauty,clean&sig=110',
+    label: 'FRAGRANCE',
+    title: 'Clean scents and soft mood essentials.',
+    cta: 'Shop fragrance'
+  },
+  {
+    image: 'https://source.unsplash.com/1800x560/?organic,cosmetics,spa&sig=111',
+    label: 'CLEAN BEAUTY',
+    title: 'Ingredient-led beauty with gentle daily care.',
+    cta: 'Shop clean picks'
+  },
 ];
 
 const quickMenus = ['Best', 'New', 'Only at Grace', 'Cica', 'SPF', 'Masks', 'Devices', 'Reels'];
@@ -55,7 +118,7 @@ export default async function Home() {
         </div>
         <button className="slideArrow prev" aria-label="Previous slide">‹</button>
         <button className="slideArrow next" aria-label="Next slide">›</button>
-        <div className="slideDots" aria-hidden="true"><span /><span /><span /></div>
+        <div className="slideDots" aria-hidden="true">{heroSlides.map((_, i) => <span key={i} className={i === 0 ? 'active' : ''} />)}</div>
       </section>
 
       <section className="quickMenuStrip" aria-label="Quick shopping menus">
