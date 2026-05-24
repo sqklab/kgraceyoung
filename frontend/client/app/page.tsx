@@ -57,17 +57,25 @@ export default async function Home() {
         <div className="sbProductGrid">
           {products.length === 0 ? (
             <article className="emptyCatalog">No products yet. Run <b>seed_phase2_catalog.py</b>.</article>
-          ) : products.map((p) => (
-            <article className="sbProductCard" key={p.id}>
-              <div className="sbProductImage">
-                {p.image_url ? <img src={p.image_url} alt={p.name} /> : <span>No image</span>}
-              </div>
-              <small>{p.brand}</small>
-              <h3>{p.name}</h3>
-              <div className="sbPrice">{formatMoney(p.price)}</div>
-              <ProductActions productId={p.id} />
-            </article>
-          ))}
+          ) : products.map((p, index) => {
+            const hover = products[(index + 1) % products.length]?.image_url;
+            return (
+              <article className="sbProductCard" key={p.id}>
+                <div className="sbProductImage">
+                  {p.image_url ? (
+                    <>
+                      <img className="sbImagePrimary" src={p.image_url} alt={p.name} />
+                      {hover && hover !== p.image_url ? <img className="sbImageHover" src={hover} alt="" aria-hidden="true" /> : null}
+                    </>
+                  ) : <span>No image</span>}
+                </div>
+                <small>{p.brand}</small>
+                <h3>{p.name}</h3>
+                <div className="sbPrice">{formatMoney(p.price)}</div>
+                <ProductActions productId={p.id} />
+              </article>
+            );
+          })}
         </div>
         <div className="sbShowMore"><a href="/products">SHOW MORE</a></div>
       </section>
