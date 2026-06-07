@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 const GUEST_CART_KEY = 'gy_guest_cart';
 
-type Product = { id: string; slug: string; name: string; brand?: string; image_url?: string; price: number; currency: string };
+type Product = { id: string; slug?: string; name: string; brand?: string; image_url?: string; price: number; currency: string };
 type ApiCart = { id: string; subtotal: string; item_count: number; items: { id: string; quantity: number; line_total: string; product: { id: string; name: string; brand?: string; image_url?: string; price: string; currency: string } }[] };
 type CartLine = { id: string; product_id: string; quantity: number; line_total: number; product: Product };
 
