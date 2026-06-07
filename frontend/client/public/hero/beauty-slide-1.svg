@@ -1,0 +1,11 @@
+<svg width="1440" height="460" viewBox="0 0 1440 460" fill="none" xmlns="http://www.w3.org/2000/svg">
+<defs><linearGradient id="g" x1="0" y1="0" x2="1440" y2="460"><stop stop-color="#fff7f2"/><stop offset="0.52" stop-color="#ffe3d8"/><stop offset="1" stop-color="#ffd2c5"/></linearGradient><filter id="s" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="28" stdDeviation="24" flood-color="#8f3a30" flood-opacity="0.22"/></filter></defs>
+<rect width="1440" height="460" fill="url(#g)"/>
+<circle cx="1160" cy="190" r="185" fill="#ff7a6b" opacity="0.13"/>
+<circle cx="290" cy="90" r="120" fill="#ffffff" opacity="0.7"/>
+<g filter="url(#s)"><rect x="895" y="95" width="142" height="248" rx="34" fill="#fff"/><rect x="916" y="135" width="100" height="118" rx="18" fill="#ff7a6b" opacity="0.9"/><rect x="928" y="276" width="76" height="16" rx="8" fill="#2b1e1a" opacity="0.18"/><rect x="928" y="304" width="76" height="10" rx="5" fill="#2b1e1a" opacity="0.1"/><rect x="1072" y="128" width="118" height="190" rx="18" fill="#2b1e1a"/><rect x="1093" y="154" width="76" height="76" rx="18" fill="#ffb3a4"/><rect x="1093" y="254" width="76" height="14" rx="7" fill="#fff" opacity="0.45"/></g>
+<text x="92" y="150" fill="#ff6f61" font-family="Arial" font-size="17" font-weight="900" letter-spacing="5">BEAUTY KURLY STYLE CURATION</text>
+<text x="92" y="225" fill="#251713" font-family="Georgia,serif" font-size="66" font-weight="800">Clean glow routines,</text>
+<text x="92" y="296" fill="#251713" font-family="Georgia,serif" font-size="66" font-weight="800">fresh from Seoul.</text>
+<text x="96" y="344" fill="#6d5a54" font-family="Arial" font-size="22" font-weight="600">Daily SPF, Cica care, and gentle beauty devices curated for the Americas.</text>
+</svg>

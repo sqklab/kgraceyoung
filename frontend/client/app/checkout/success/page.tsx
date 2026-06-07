@@ -1,0 +1,4 @@
+'use client';
+import { useEffect, useState } from 'react';
+const API=process.env.NEXT_PUBLIC_API_URL||'http://localhost:8000';
+export default function CheckoutSuccess(){const [msg,setMsg]=useState('Confirming order...');useEffect(()=>{const qs=new URLSearchParams(location.search);const order=qs.get('order_id');const mock=qs.get('mock');const t=localStorage.getItem('gy_customer_token')||'';if(order&&mock){fetch(`${API}/api/v1/payments/stripe/mock-paid/${order}`,{method:'POST',headers:{Authorization:`Bearer ${t}`}}).then(()=>setMsg('Payment confirmed. Thank you for your order.')).catch(()=>setMsg('Order created. Payment confirmation pending.'))}else setMsg('Payment completed. Confirmation may take a moment.');},[]);return <main className="commercePage"><a href="/">← Grace Young</a><section className="accountCard"><span className="pill">Order confirmed</span><h1>Thank you</h1><p>{msg}</p><a className="primaryLink" href="/orders">View orders</a></section></main>}

@@ -1,0 +1,10 @@
+<svg width="1440" height="460" viewBox="0 0 1440 460" fill="none" xmlns="http://www.w3.org/2000/svg">
+<defs><linearGradient id="g" x1="0" y1="0" x2="1440" y2="460"><stop stop-color="#f8fff4"/><stop offset="0.55" stop-color="#edf8e2"/><stop offset="1" stop-color="#dff0cf"/></linearGradient><filter id="s" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="28" stdDeviation="24" flood-color="#446e1f" flood-opacity="0.2"/></filter></defs>
+<rect width="1440" height="460" fill="url(#g)"/>
+<circle cx="1120" cy="230" r="210" fill="#95c83d" opacity="0.2"/>
+<g filter="url(#s)"><rect x="840" y="95" width="180" height="250" rx="30" fill="#fff"/><rect x="875" y="130" width="110" height="130" rx="20" fill="#95c83d" opacity="0.88"/><text x="892" y="205" font-size="28" font-family="Arial" fill="#fff" font-weight="900">CICA</text><rect x="890" y="288" width="82" height="14" rx="7" fill="#2b1e1a" opacity="0.16"/><rect x="1060" y="120" width="210" height="210" rx="105" fill="#fff"/><rect x="1115" y="168" width="100" height="112" rx="22" fill="#ff7a6b" opacity="0.9"/></g>
+<text x="92" y="150" fill="#5f9f18" font-family="Arial" font-size="17" font-weight="900" letter-spacing="5">SENSITIVE & BARRIER</text>
+<text x="92" y="225" fill="#251713" font-family="Georgia,serif" font-size="66" font-weight="800">Cica comfort for</text>
+<text x="92" y="296" fill="#251713" font-family="Georgia,serif" font-size="66" font-weight="800">calm skin days.</text>
+<text x="96" y="344" fill="#516346" font-family="Arial" font-size="22" font-weight="600">Shop barrier-safe routines with point-color filters and curated product checks.</text>
+</svg>

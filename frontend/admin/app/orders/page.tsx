@@ -1,19 +1,5 @@
 'use client';
-
 import { useEffect, useState } from 'react';
-const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-
-type Order = { id: string; email: string; status: string; payment_status: string; fulfillment_status: string; grand_total: number; currency: string; shipping_country?: string; created_at?: string; items: { product_name: string; quantity: number; line_total: number }[] };
-
-export default function AdminOrdersPage() {
-  const [orders, setOrders] = useState<Order[]>([]);
-  const [message, setMessage] = useState('Loading orders...');
-  useEffect(() => {
-    const t = localStorage.getItem('gy_admin_token') || '';
-    if (!t) { window.location.href = '/login'; return; }
-    fetch(`${API}/api/v1/admin/orders`, { headers: { Authorization: `Bearer ${t}` } })
-      .then(async res => { const json = await res.json(); if (!res.ok) throw new Error(json.detail || 'Orders unavailable'); setOrders(json); setMessage(''); })
-      .catch(e => setMessage(String(e)));
-  }, []);
-  return <main className="adminPage"><header className="adminHeader"><a href="/">← Dashboard</a><h1>Orders</h1><p>Phase 5 order creation monitor. Payment and shipping labels will be connected next.</p></header>{message && <div className="notice">{message}</div>}<section className="panel"><div className="orderTable">{orders.length === 0 ? <p>No orders yet.</p> : orders.map(o => <article className="orderRow" key={o.id}><div><strong>#{o.id.slice(0, 8)}</strong><span>{o.email}</span><small>{o.items.map(i => `${i.product_name} x${i.quantity}`).join(', ')}</small></div><div><b>${Number(o.grand_total).toFixed(2)}</b><span>{o.status}</span><small>{o.payment_status} · {o.fulfillment_status}</small></div></article>)}</div></section></main>;
-}
+import AdminShell from '../AdminShell';
+import { api, money, short } from '../lib';
+export default function Orders(){const [orders,setOrders]=useState<any[]>([]);const [selected,setSelected]=useState<any|null>(null);const [msg,setMsg]=useState('');async function load(){const j=await api('/admin/orders');setOrders(j);setSelected((s:any)=>s||j[0]||null)}useEffect(()=>{load().catch(e=>setMsg(e.message))},[]);async function patch(body:any){if(!selected)return;await api(`/admin/orders/${selected.id}`,{method:'PATCH',body:JSON.stringify(body)});setMsg('Order updated');setSelected(null);await load()}async function label(){if(!selected)return;const j=await api(`/admin/orders/${selected.id}/shipping-label`,{method:'POST',body:JSON.stringify({carrier:'Grace Logistics',service:'Standard'})});setMsg(`Label created: ${j.tracking_code}`);setSelected(null);await load()}async function slip(){if(!selected)return;const j=await api(`/admin/orders/${selected.id}/packing-slip`);const w=window.open('','_blank'); if(w){w.document.write(`<pre style="font:16px monospace;white-space:pre-wrap">${j.text}</pre>`);w.document.close()}}return <AdminShell><header className="pageHead"><p>Orders</p><h1>Order Management</h1><span>Process payments, fulfillment, tracking and packing slips.</span></header>{msg&&<div className="notice">{msg}</div>}<div className="split"><section className="panel"><h2>Orders</h2>{orders.map(o=><button className="orderButton" key={o.id} onClick={()=>setSelected(o)}><b>#{short(o.id)}</b><span>{o.email}</span><em>{o.payment_status} · {o.fulfillment_status} · {money(o.grand_total)}</em></button>)}</section><section className="panel sticky"><h2>Order Detail</h2>{selected?<><div className="detail"><b>#{short(selected.id)}</b><span>{selected.email}</span><span>{selected.shipping_name}</span><span>{selected.shipping_line1}, {selected.shipping_city}</span><span>Status: {selected.status}</span><span>Payment: {selected.payment_status}</span><span>Fulfillment: {selected.fulfillment_status}</span><span>Tracking: {selected.tracking_code||'-'}</span></div><h3>Items</h3>{selected.items?.map((i:any,idx:number)=><div className="row" key={idx}><b>{i.product_name}</b><span>x{i.quantity}</span><em>{money(i.line_total)}</em></div>)}<div className="buttonRow"><button onClick={()=>patch({payment_status:'paid',status:'paid'})}>Mark Paid</button><button onClick={()=>patch({fulfillment_status:'fulfillment_pending',status:'fulfillment_pending'})}>Prepare</button><button onClick={label}>Create Label</button><button onClick={slip}>Print Slip</button><button onClick={()=>patch({status:'cancelled',fulfillment_status:'cancelled'})}>Cancel</button></div></>:<p>Select an order.</p>}</section></div></AdminShell>}

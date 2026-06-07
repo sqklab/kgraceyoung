@@ -1,0 +1,5 @@
+'use client';
+import { useEffect, useState } from 'react';
+import AdminShell from '../AdminShell';
+import { api, money, short } from '../lib';
+export default function Payments(){const [items,setItems]=useState<any[]>([]);const [msg,setMsg]=useState('');async function load(){setItems(await api('/admin/payments'))}useEffect(()=>{load().catch(e=>setMsg(e.message))},[]);async function refund(id:string){if(confirm('Refund payment?')){await api(`/admin/payments/${id}/refund`,{method:'POST'});await load()}}return <AdminShell><header className="pageHead"><p>Payments</p><h1>Payment Operations</h1><span>Stripe/mock sessions, payment status, and refund operation.</span></header>{msg&&<div className="notice">{msg}</div>}<section className="panel"><h2>Payments</h2>{items.map(p=><div className="row" key={p.id}><b>#{short(p.id)}</b><span>{p.provider} · {p.status} · order {short(p.order_id)}</span><em>{money(p.amount)}</em><button onClick={()=>refund(p.id)}>Refund</button></div>)}</section></AdminShell>}

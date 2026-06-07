@@ -79,6 +79,13 @@ class Order(Base):
     shipping_postal_code: Mapped[str | None] = mapped_column(String(40), nullable=True)
     shipping_country: Mapped[str | None] = mapped_column(String(2), nullable=True)
     notes: Mapped[str | None] = mapped_column(Text, nullable=True)
+
+    shipping_rate_id: Mapped[str | None] = mapped_column(String(120), nullable=True)
+    shipping_carrier: Mapped[str | None] = mapped_column(String(80), nullable=True)
+    shipping_service: Mapped[str | None] = mapped_column(String(120), nullable=True)
+    stripe_checkout_session_id: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    tracking_code: Mapped[str | None] = mapped_column(String(120), nullable=True)
+    shipped_at = mapped_column(DateTime(timezone=True), nullable=True)
     created_at = mapped_column(DateTime(timezone=True), server_default=text("now()"))
 
     items: Mapped[list["OrderItem"]] = relationship(back_populates="order", cascade="all, delete-orphan")

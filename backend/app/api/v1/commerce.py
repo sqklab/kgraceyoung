@@ -219,7 +219,7 @@ def checkout(payload: CheckoutRequest, db: Session = Depends(get_db), user: User
             raise HTTPException(status_code=400, detail="Shipping address required")
 
     subtotal = cart_data["subtotal"]
-    shipping_total = Decimal("0.00") if subtotal >= Decimal("49.00") else Decimal("6.95")
+    shipping_total = Decimal(str(payload.shipping_total)) if payload.shipping_total is not None else (Decimal("0.00") if subtotal >= Decimal("70.00") else Decimal("6.95"))
     tax_total = Decimal("0.00")
     grand_total = subtotal + shipping_total + tax_total
 
@@ -244,6 +244,9 @@ def checkout(payload: CheckoutRequest, db: Session = Depends(get_db), user: User
         shipping_postal_code=address.postal_code,
         shipping_country=address.country,
         notes=payload.notes,
+        shipping_rate_id=payload.shipping_rate_id,
+        shipping_carrier=payload.shipping_carrier,
+        shipping_service=payload.shipping_service,
     )
     db.add(order)
     db.flush()
@@ -282,6 +285,10 @@ def get_order_payload(db: Session, order_id: UUID, user: User) -> dict:
         "shipping_state": order.shipping_state,
         "shipping_postal_code": order.shipping_postal_code,
         "shipping_country": order.shipping_country,
+        "shipping_rate_id": getattr(order, "shipping_rate_id", None),
+        "shipping_carrier": getattr(order, "shipping_carrier", None),
+        "shipping_service": getattr(order, "shipping_service", None),
+        "tracking_code": getattr(order, "tracking_code", None),
         "notes": order.notes,
         "items": [{"id": i.id, "product_id": i.product_id, "product_name": i.product_name, "quantity": i.quantity, "unit_price": i.unit_price, "line_total": i.line_total} for i in order.items],
     }
@@ -296,3 +303,8 @@ def list_orders(db: Session = Depends(get_db), user: User = Depends(get_current_
 @router.get("/orders/{order_id}", response_model=OrderRead)
 def get_order(order_id: UUID, db: Session = Depends(get_db), user: User = Depends(get_current_user)):
     return get_order_payload(db, order_id, user)
+
+
+@router.post("/checkout/start", response_model=OrderRead, status_code=status.HTTP_201_CREATED)
+def checkout_start(payload: CheckoutRequest, db: Session = Depends(get_db), user: User = Depends(get_current_user)):
+    return checkout(payload, db, user)

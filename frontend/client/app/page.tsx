@@ -26,19 +26,29 @@ async function getProducts(): Promise<Product[]> {
   }
 }
 
+async function getBanners(): Promise<{image_url:string; title:string}[]> {
+  try {
+    const res = await fetch(`${API}/api/v1/banners?placement=home_hero`, { cache: 'no-store' });
+    if (!res.ok) return [];
+    return res.json();
+  } catch { return []; }
+}
+
 function formatMoney(value: number) {
   return `$${Number(value || 0).toFixed(2)}`;
 }
 
 export default async function Home() {
   const products = await getProducts();
+  const remoteBanners = await getBanners();
+  const slides = remoteBanners.length ? remoteBanners.map((b) => ({ image: b.image_url, title: b.title })) : heroSlides;
   return (
     <main className="sbShell">
       <CommerceHeader />
 
       <section className="sbHero" aria-label="kgraceyoung promotional slides">
         <div className="sbHeroTrack">
-          {heroSlides.map((slide, index) => (
+          {slides.map((slide, index) => (
             <article className="sbHeroSlide" key={slide.title} aria-hidden={index !== 0}>
               <img src={slide.image} alt={slide.title} />
             </article>
@@ -46,7 +56,7 @@ export default async function Home() {
         </div>
         <button className="sbHeroArrow sbPrev" aria-label="Previous slide">‹</button>
         <button className="sbHeroArrow sbNext" aria-label="Next slide">›</button>
-        <div className="sbHeroDots" aria-hidden="true">{heroSlides.slice(0, 4).map((_, i) => <span key={i} className={i === 0 ? 'active' : ''} />)}</div>
+        <div className="sbHeroDots" aria-hidden="true">{slides.slice(0, 4).map((_, i) => <span key={i} className={i === 0 ? 'active' : ''} />)}</div>
       </section>
 
       <section className="sbProductSection" id="products">
@@ -61,16 +71,16 @@ export default async function Home() {
             const hover = products[(index + 1) % products.length]?.image_url;
             return (
               <article className="sbProductCard" key={p.id}>
-                <div className="sbProductImage">
+                <a className="sbProductImage" href={`/products/${p.slug}`}>
                   {p.image_url ? (
                     <>
                       <img className="sbImagePrimary" src={p.image_url} alt={p.name} />
                       {hover && hover !== p.image_url ? <img className="sbImageHover" src={hover} alt="" aria-hidden="true" /> : null}
                     </>
                   ) : <span>No image</span>}
-                </div>
+                </a>
                 <small>{p.brand}</small>
-                <h3>{p.name}</h3>
+                <a href={`/products/${p.slug}`}><h3>{p.name}</h3></a>
                 <div className="sbPrice">{formatMoney(p.price)}</div>
                 <ProductActions productId={p.id} />
               </article>

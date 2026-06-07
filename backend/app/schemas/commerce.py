@@ -83,6 +83,10 @@ class WishlistItemRead(BaseModel):
 class CheckoutRequest(BaseModel):
     shipping_address_id: UUID | None = None
     address: AddressCreate | None = None
+    shipping_rate_id: str | None = None
+    shipping_carrier: str | None = None
+    shipping_service: str | None = None
+    shipping_total: Decimal | None = None
     notes: str | None = None
 
 
@@ -112,5 +116,9 @@ class OrderRead(BaseModel):
     shipping_state: str | None = None
     shipping_postal_code: str | None = None
     shipping_country: str | None = None
+    shipping_rate_id: str | None = None
+    shipping_carrier: str | None = None
+    shipping_service: str | None = None
+    tracking_code: str | None = None
     notes: str | None = None
     items: list[OrderItemRead]
