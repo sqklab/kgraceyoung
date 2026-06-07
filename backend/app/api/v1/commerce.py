@@ -10,7 +10,7 @@ from app.models.catalog import Product
 from app.models.commerce import Cart, CartItem, WishlistItem, CustomerAddress, Order, OrderItem
 from app.schemas.commerce import (
     AddressCreate, AddressRead, AddressUpdate, CartAddItem, CartRead, CartUpdateItem,
-    CheckoutRequest, OrderRead, WishlistItemRead
+    CheckoutRequest, CartMergeRequest, OrderRead, WishlistItemRead
 )
 
 router = APIRouter(prefix="/commerce", tags=["commerce"])
@@ -117,6 +117,37 @@ def delete_cart_item(item_id: UUID, db: Session = Depends(get_db), user: User = 
     if item:
         db.delete(item)
         db.commit()
+    return cart_payload(db, cart)
+
+
+@router.post("/cart/merge", response_model=CartRead)
+def merge_guest_cart(payload: CartMergeRequest, db: Session = Depends(get_db), user: User = Depends(get_current_user)):
+    """Merge a browser/localStorage guest cart into the authenticated user cart.
+
+    The client stores a small guest cart before login. After login it posts that
+    list here, and this endpoint upserts quantities into the persistent DB cart.
+    """
+    cart = get_or_create_cart(db, user)
+    if not payload.items:
+        return cart_payload(db, cart)
+
+    product_ids = [item.product_id for item in payload.items]
+    products = db.scalars(
+        select(Product).where(Product.id.in_(product_ids), Product.status == "published")
+    ).all()
+    valid_ids = {p.id for p in products}
+
+    for incoming in payload.items:
+        if incoming.product_id not in valid_ids:
+            continue
+        item = db.scalar(
+            select(CartItem).where(CartItem.cart_id == cart.id, CartItem.product_id == incoming.product_id)
+        )
+        if item:
+            item.quantity = min(99, item.quantity + incoming.quantity)
+        else:
+            db.add(CartItem(cart_id=cart.id, product_id=incoming.product_id, quantity=incoming.quantity))
+    db.commit()
     return cart_payload(db, cart)
 
 

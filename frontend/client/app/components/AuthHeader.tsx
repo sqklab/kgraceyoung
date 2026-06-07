@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 
 const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+const GUEST_CART_KEY = 'gy_guest_cart';
 
 type User = { email: string; full_name?: string; role?: string; locale?: string };
 
@@ -19,10 +20,28 @@ function GlobeIcon() {
   return (<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" strokeWidth="1.8"/><path d="M3 12h18M12 3c2.3 2.4 3.3 5.4 3.3 9S14.3 18.6 12 21M12 3C9.7 5.4 8.7 8.4 8.7 12s1 6.6 3.3 9" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/></svg>);
 }
 
+function guestCount() {
+  try {
+    const items = JSON.parse(localStorage.getItem(GUEST_CART_KEY) || '[]');
+    return Array.isArray(items) ? items.reduce((sum, item) => sum + Number(item.quantity || 0), 0) : 0;
+  } catch { return 0; }
+}
+
 export default function AuthHeader() {
   const [user, setUser] = useState<User | null>(null);
   const [ready, setReady] = useState(false);
   const [open, setOpen] = useState(false);
+  const [cartCount, setCartCount] = useState(0);
+
+  async function refreshCartCount() {
+    const token = localStorage.getItem('gy_customer_token');
+    if (!token) { setCartCount(guestCount()); return; }
+    try {
+      const res = await fetch(`${API}/api/v1/commerce/cart`, { headers: { Authorization: `Bearer ${token}` } });
+      const json = await res.json();
+      setCartCount(res.ok ? Number(json.item_count || 0) : guestCount());
+    } catch { setCartCount(guestCount()); }
+  }
 
   useEffect(() => {
     let cancelled = false;
@@ -31,28 +50,31 @@ export default function AuthHeader() {
     if (cached) {
       try { setUser(JSON.parse(cached)); } catch { localStorage.removeItem('gy_customer_user'); }
     }
-    if (!token) { setReady(true); return; }
-    fetch(`${API}/api/v1/auth/me`, { headers: { Authorization: `Bearer ${token}` } })
-      .then(async (res) => {
-        const json = await res.json().catch(() => null);
-        if (!res.ok || !json) throw new Error('Session expired');
-        if (!cancelled) { setUser(json); localStorage.setItem('gy_customer_user', JSON.stringify(json)); }
-      })
-      .catch(() => {
-        localStorage.removeItem('gy_customer_token');
-        localStorage.removeItem('gy_customer_user');
-        if (!cancelled) setUser(null);
-      })
-      .finally(() => { if (!cancelled) setReady(true); });
-    const syncAuth = () => {
+    if (!token) { setReady(true); refreshCartCount(); }
+    else {
+      fetch(`${API}/api/v1/auth/me`, { headers: { Authorization: `Bearer ${token}` } })
+        .then(async (res) => {
+          const json = await res.json().catch(() => null);
+          if (!res.ok || !json) throw new Error('Session expired');
+          if (!cancelled) { setUser(json); localStorage.setItem('gy_customer_user', JSON.stringify(json)); }
+        })
+        .catch(() => {
+          localStorage.removeItem('gy_customer_token');
+          localStorage.removeItem('gy_customer_user');
+          if (!cancelled) setUser(null);
+        })
+        .finally(() => { if (!cancelled) { setReady(true); refreshCartCount(); } });
+    }
+    const sync = () => {
       const next = localStorage.getItem('gy_customer_user');
-      if (!next) { setUser(null); return; }
-      try { setUser(JSON.parse(next)); } catch { setUser(null); }
+      if (!next) setUser(null); else { try { setUser(JSON.parse(next)); } catch { setUser(null); } }
+      refreshCartCount();
     };
-    window.addEventListener('storage', syncAuth);
-    window.addEventListener('gy-auth-changed', syncAuth as EventListener);
-    window.addEventListener('focus', syncAuth);
-    return () => { cancelled = true; window.removeEventListener('storage', syncAuth); window.removeEventListener('gy-auth-changed', syncAuth as EventListener); window.removeEventListener('focus', syncAuth); };
+    window.addEventListener('storage', sync);
+    window.addEventListener('gy-auth-changed', sync as EventListener);
+    window.addEventListener('gy-cart-changed', sync as EventListener);
+    window.addEventListener('focus', sync);
+    return () => { cancelled = true; window.removeEventListener('storage', sync); window.removeEventListener('gy-auth-changed', sync as EventListener); window.removeEventListener('gy-cart-changed', sync as EventListener); window.removeEventListener('focus', sync); };
   }, []);
 
   const displayName = useMemo(() => user?.full_name?.split(' ')[0] || user?.email?.split('@')[0] || 'Grace', [user]);
@@ -66,7 +88,7 @@ export default function AuthHeader() {
 
   return (
     <div className="sbActions authMenuWrap">
-      <a className="sbAction sbCart" href="/cart"><BagIcon /><span>Shopping Cart</span><b>0</b></a>
+      <a className="sbAction sbCart" href="/cart"><BagIcon /><span>Shopping Cart</span><b>{cartCount}</b></a>
       <a className="sbAction" href="/wishlist"><HeartIcon /><span>My Wish Lists</span></a>
       {user ? (
         <button className="sbAction sbAccount" onClick={() => setOpen((v) => !v)} aria-expanded={open} aria-label="My account"><UserIcon /><span>{displayName}</span></button>

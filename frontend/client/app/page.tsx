@@ -67,17 +67,11 @@ export default async function Home() {
         <div className="sbProductGrid">
           {products.length === 0 ? (
             <article className="emptyCatalog">No products yet. Run <b>seed_phase2_catalog.py</b>.</article>
-          ) : products.map((p, index) => {
-            const hover = products[(index + 1) % products.length]?.image_url;
+          ) : products.map((p) => {
             return (
               <article className="sbProductCard" key={p.id}>
                 <a className="sbProductImage" href={`/products/${p.slug}`}>
-                  {p.image_url ? (
-                    <>
-                      <img className="sbImagePrimary" src={p.image_url} alt={p.name} />
-                      {hover && hover !== p.image_url ? <img className="sbImageHover" src={hover} alt="" aria-hidden="true" /> : null}
-                    </>
-                  ) : <span>No image</span>}
+                  {p.image_url ? <img className="sbImagePrimary" src={p.image_url} alt={p.name} /> : <span>No image</span>}
                 </a>
                 <small>{p.brand}</small>
                 <a href={`/products/${p.slug}`}><h3>{p.name}</h3></a>

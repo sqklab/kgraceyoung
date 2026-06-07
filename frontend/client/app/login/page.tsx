@@ -3,6 +3,7 @@
 import { FormEvent, useState } from 'react';
 
 const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+const GUEST_CART_KEY = 'gy_guest_cart';
 
 function normalizeDetail(detail: unknown) {
   if (!detail) return '';
@@ -52,6 +53,18 @@ export default function CustomerLoginPage() {
       if (!res.ok) { setMessage(normalizeDetail(json.detail) || 'Login failed. Check seed account and password.'); return; }
       localStorage.setItem('gy_customer_token', json.access_token);
       localStorage.setItem('gy_customer_user', JSON.stringify(json.user));
+      try {
+        const guestItems = JSON.parse(localStorage.getItem(GUEST_CART_KEY) || '[]');
+        if (Array.isArray(guestItems) && guestItems.length) {
+          await fetch(`${API}/api/v1/commerce/cart/merge`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${json.access_token}` },
+            body: JSON.stringify({ items: guestItems }),
+          });
+          localStorage.removeItem(GUEST_CART_KEY);
+        }
+      } catch {}
+      window.dispatchEvent(new Event('gy-auth-changed'));
       window.location.href = '/account';
     } catch (err) {
       setMessage(friendlyError(err));

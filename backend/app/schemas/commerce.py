@@ -80,6 +80,15 @@ class WishlistItemRead(BaseModel):
     product: ProductMini
 
 
+class CartMergeItem(BaseModel):
+    product_id: UUID
+    quantity: int = Field(default=1, ge=1, le=99)
+
+
+class CartMergeRequest(BaseModel):
+    items: list[CartMergeItem] = []
+
+
 class CheckoutRequest(BaseModel):
     shipping_address_id: UUID | None = None
     address: AddressCreate | None = None

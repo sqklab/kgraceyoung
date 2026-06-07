@@ -66,3 +66,28 @@ b,strong{font-weight:600}.sbShell{font-weight:400}.sbHeader *{font-weight:400}.s
 
 /* Phase 6-9 real commerce flow */
 .productDetailPage{max-width:1180px}.pdpGrid{display:grid;grid-template-columns:1.05fr .95fr;gap:48px;margin-top:28px}.pdpGallery{background:#fff;border:1px solid var(--line);border-radius:22px;padding:22px}.pdpMainImage{width:100%;height:520px;object-fit:contain;background:#fff}.pdpThumbs{display:flex;gap:12px;margin-top:14px}.pdpThumbs img{width:86px;height:86px;object-fit:contain;border:1px solid var(--line);border-radius:12px;background:#fff}.pdpInfo{padding:22px 0}.pdpBrand{text-transform:uppercase;letter-spacing:2px;font-size:12px;color:var(--point)}.pdpInfo h1{font-size:32px;font-weight:500;line-height:1.2;margin:10px 0}.pdpDesc{line-height:1.75;color:#60565f}.pdpPrice{font-size:24px;font-weight:500;margin:24px 0}.pdpMeta{margin-top:24px;border-top:1px solid var(--line);padding-top:18px;display:grid;gap:6px}.pdpMeta span{color:#6b6068}.pdpTabs{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin:40px 0}.pdpTabs article{border:1px solid var(--line);border-radius:18px;padding:18px;background:#fff}.pdpTabs h2{font-size:15px}.pdpTabs p{font-size:13px;line-height:1.7;color:#655b63}.productListingGrid{margin-top:26px}.checkoutReal{max-width:1280px}.checkoutColumns{display:grid;grid-template-columns:1.2fr 1fr 320px;gap:20px;align-items:start}.rateOption{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;border:1px solid var(--line);border-radius:14px;padding:14px;margin:10px 0}.rateOption small{display:block;color:#74686e;margin-top:4px}.checkoutButton{height:48px;border:0;border-radius:999px;background:var(--point);color:#fff;padding:0 28px;font-weight:500}.primaryLink{display:inline-flex;align-items:center;justify-content:center;height:42px;border-radius:999px;background:var(--point);color:#fff;padding:0 22px;margin-top:12px}.accountCard{border:1px solid var(--line);background:#fff;border-radius:22px;padding:30px;max-width:620px}.pill{display:inline-flex;background:var(--point);color:#fff;border-radius:999px;padding:7px 12px;font-size:12px}.productActions{display:flex;gap:8px;justify-content:center;align-items:center}.productActions button{border:1px solid var(--line);background:#fff;border-radius:999px;height:32px;padding:0 16px}.productActions button:first-child{background:var(--point);border-color:var(--point);color:#fff}.productActions small{font-size:11px;color:#7b6662}.commercePage select,.commercePage input{border:1px solid var(--line);border-radius:10px;padding:10px;background:#fff}.commercePage label{display:grid;gap:6px;font-size:13px;color:#5a5055}.summary{position:sticky;top:18px}@media(max-width:1000px){.pdpGrid,.checkoutColumns{grid-template-columns:1fr}.pdpTabs{grid-template-columns:1fr 1fr}.summary{position:static}}@media(max-width:620px){.pdpTabs{grid-template-columns:1fr}.pdpMainImage{height:360px}}
+
+
+/* Phase 11.1 visual correction: no hover-image swap and no colored product image background */
+.sbProductImage,
+.product img,
+.pdpGallery,
+.pdpMainImage,
+.pdpThumbs img {
+  background: transparent !important;
+}
+.sbProductImage .sbImageHover {
+  display: none !important;
+}
+.sbProductImage img {
+  position: static !important;
+  inset: auto !important;
+  opacity: 1 !important;
+  transform: none !important;
+  background: transparent !important;
+}
+.sbProductCard:hover .sbProductImage .sbImagePrimary,
+.sbProductCard:hover .sbProductImage img {
+  opacity: 1 !important;
+  transform: none !important;
+}
